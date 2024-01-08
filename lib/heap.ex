@@ -246,11 +246,14 @@ end
 defimpl Enumerable, for: Heap do
   def reduce(_heap, {:halt, acc}, _fun), do: {:halted, acc}
   def reduce(heap, {:suspend, acc}, fun), do: {:suspend, acc, &reduce(heap, &1, fun)}
-  def reduce(nil, {:cont, acc}, _fun), do: {:done, acc}
 
   def reduce(heap, {:cont, acc}, fun) do
-    {v, nh} = Heap.pop_top!(heap)
-    reduce(nh, fun.(v, acc), fun)
+    if heap.count > 0 do
+      {v, nh} = Heap.pop_top!(heap)
+      reduce(nh, fun.(v, acc), fun)
+    else
+      {:done, acc}
+    end
   end
 
   def count(heap), do: heap.count
